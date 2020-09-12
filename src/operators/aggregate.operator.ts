@@ -2,7 +2,7 @@ import { Observable, OperatorFunction, forkJoin, throwError, race } from 'rxjs';
 import { filter, first, switchMap } from 'rxjs/operators';
 import { CorrelatedElement, AggregationFailedElement } from '../models';
 
-export function aggregate<S, T extends CorrelatedElement<S>, U extends AggregationFailedElement<S>>(idProp: string, dependentElements: Observable<T>[], failElement$?: Observable<U>): OperatorFunction<T, T[]> {
+export function aggregate<S, T extends CorrelatedElement<S>, U extends AggregationFailedElement<S>>(dependentElements: Observable<T>[], idProp: string = 'type', failElement$?: Observable<U>): OperatorFunction<T, T[]> {
     // Filter the elements for the correlation
     const filterElement = (sourceElement: T, { correlationParams }: T | U): boolean =>
         !!correlationParams && !!sourceElement.correlationParams &&
