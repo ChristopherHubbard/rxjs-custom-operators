@@ -1,0 +1,44 @@
+{
+  "name": "rxjs-custom-operators",
+  "version": "1.0.0",
+  "description": "RxJS custom operators to be imported as a package",
+  "main": "index.js",
+  "scripts": {
+    "build-dev": "tsc -p ./ && NODE_ENV=LOCAL DEBUG_MODE=TRUE webpack --config ./distlib/webpack.config.js --mode development",
+    "build-prod": "tsc -p ./ && NODE_ENV=PROD webpack --config ./distlib/webpack.config.js --mode production",
+    "test": "NODE_ENV=LOCAL jest --coverage --collectCoverageFrom=src/**/*.{ts,tsx}"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rxjs-custom-operators.git"
+  },
+  "author": "Christopher Hubbard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChristopherHubbard/rxjs-custom-operators/issues"
+  },
+  "homepage": "https://github.com/ChristopherHubbard/rxjs-custom-operators#readme",
+  "dependencies": {
+    "react-redux": "^6.0.0",
+    "redux": "^4.0.1",
+    "redux-actions": "^2.6.5",
+    "redux-form": "^8.1.0",
+    "redux-observable": "^1.2.0",
+    "redux-thunk": "^2.3.0",
+    "rxjs": "^6.5.4",
+    "ts-loader": "^5.3.3",
+    "webpack": "^4.29.1"
+  },
+  "devDependencies": {
+    "@types/react-redux": "^7.0.1",
+    "@types/react-router-dom": "^4.3.1",
+    "@types/redux-actions": "^2.6.1",
+    "@types/redux-form": "^7.4.16",
+    "@types/redux-mock-store": "^1.0.0",
+    "@types/sinon": "^7.0.6",
+    "redux-mock-store": "^1.5.3",
+    "sinon": "^7.2.4",
+    "typescript": "^3.3.1",
+    "webpack-cli": "^3.2.3"
+  }
+}
