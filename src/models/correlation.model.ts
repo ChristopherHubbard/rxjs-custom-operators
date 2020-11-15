@@ -1,6 +1,6 @@
 export interface CorrelationParams {
     correlationId: string;
-    parentElementId: string
+    parentElementId?: string
 }
 
 export type CorrelatedElement<T> = T & { correlationParams?: CorrelationParams };

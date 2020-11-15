@@ -1,7 +1,7 @@
 import { TestScheduler } from 'rxjs/testing';
 import { expect } from 'chai';
 import { aggregate } from './aggregate.operator';
-import { Action } from 'redux-actions';
+import { Action, createAction } from 'redux-actions';
 import { Observable } from 'rxjs';
 import { CorrelatedElement, CorrelationParams } from '../models';
 import uuid from 'uuid/v4';
@@ -16,15 +16,20 @@ describe('Aggregate Operator', () => {
         })
     });
 
-    it('should aggregate elements without a failElement', () => {
+    it.only('should aggregate elements without a failElement', () => {
+        // Run the marble test scheduler to test the observables
         scheduler.run(({ cold, hot, expectObservable }) => {
             const correlationParams: CorrelationParams = {
                 correlationId: uuid(),
                 parentElementId: 'parent'
             };
 
-            const dependentObservables: Observable<CorrelatedElement<Action<any>>>[] = [
+            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => )
+            const action1: Action<any> = createAction('firstAction')();
+            const action2: Action<any> = createAction('secondAction')();
 
+            const dependentObservables: Observable<CorrelatedElement<Action<any>>>[] = [
+                cold('---a', { a: { type: }})
             ];
 
             const sourceElement$: Observable<Action<any>> = ;
