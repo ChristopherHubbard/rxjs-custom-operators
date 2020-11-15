@@ -21,12 +21,12 @@ describe('Aggregate Operator', () => {
         scheduler.run(({ cold, hot, expectObservable }) => {
             const correlationParams: CorrelationParams = {
                 correlationId: uuid(),
-                parentElementId: 'parent'
+                parentElementId: 'parentAction'
             };
 
-            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => )
-            const action1: Action<any> = createAction('firstAction')();
-            const action2: Action<any> = createAction('secondAction')();
+            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => correlationParams)();
+            const action1: Action<any> = createAction('firstAction', params => ({ ...params, correlationParams }))({});
+            const action2: Action<any> = createAction('secondAction', params => ({ ...params, correlationParams}))({ value: 3 });
 
             const dependentObservables: Observable<CorrelatedElement<Action<any>>>[] = [
                 cold('---a', { a: { type: }})
