@@ -1,13 +1,14 @@
 import { Observable, OperatorFunction, forkJoin, throwError, race, of } from 'rxjs';
 import { filter, first, switchMap, take } from 'rxjs/operators';
 import { CorrelatedElement, AggregationFailedElement } from '../models';
+import { getProp } from '../utils';
 
-export function aggregate<S, T extends CorrelatedElement<S>, U extends AggregationFailedElement<S>>(dependentElements: Map<Observable<T>, number> | Observable<T>[], idProp: string = 'type', failElements?: Observable<U>[]): OperatorFunction<T, T[]> {
+export function aggregate<S, T extends CorrelatedElement<S>, U extends AggregationFailedElement<S>>(dependentElements: Map<Observable<T>, number> | Observable<T>[], idProp: string = 'type', correlationParamsProp: string = 'payload.correlationParams', failElements?: Observable<U>[]): OperatorFunction<T, T[]> {
     // Filter the elements for the correlation
-    const filterElement = (sourceElement: T, { correlationParams }: T | U): boolean =>
-        !!correlationParams && !!sourceElement.correlationParams &&
-        correlationParams.correlationId === sourceElement.correlationParams.correlationId &&
-        correlationParams.parentElementId === (sourceElement as any)[idProp];
+    const filterElement = (sourceElement: T, dependentElement: T | U): boolean =>
+        !!getProp(dependentElement, correlationParamsProp) && !!getProp(sourceElement, correlationParamsProp) &&
+        getProp(dependentElement, `${correlationParamsProp}.correlationId`) === getProp(sourceElement, `${correlationParamsProp}.correlationId`) &&
+        getProp(dependentElement, `${correlationParamsProp}.parentElementId`) === getProp(sourceElement, idProp);
 
     const getAggregatedElements = (sourceElement: T): Observable<T[]> => {
         // Create the observables that are expected to complete - could be either a Map to the number of times

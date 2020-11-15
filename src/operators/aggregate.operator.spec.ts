@@ -3,8 +3,11 @@ import { expect } from 'chai';
 import { aggregate } from './aggregate.operator';
 import { Action, createAction } from 'redux-actions';
 import { Observable } from 'rxjs';
+import { ofType } from 'redux-observable';
 import { CorrelatedElement, CorrelationParams } from '../models';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
+import { HotObservable } from 'rxjs/internal/testing/HotObservable';
+import { tap } from 'rxjs/operators';
 
 describe('Aggregate Operator', () => {
     let scheduler: TestScheduler;
@@ -24,24 +27,35 @@ describe('Aggregate Operator', () => {
                 parentElementId: 'parentAction'
             };
 
-            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => correlationParams)();
-            const action1: Action<any> = createAction('firstAction', params => ({ ...params, correlationParams }))({});
-            const action2: Action<any> = createAction('secondAction', params => ({ ...params, correlationParams}))({ value: 3 });
+            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => ({ correlationParams }))();
+            const action1: Action<any> = createAction('firstAction', (params: any) => ({ ...params, correlationParams }))({});
+            const action2: Action<any> = createAction('secondAction', (params: any) => ({ ...params, correlationParams}))({ value: 3 });
+
+            const actions$: HotObservable<CorrelatedElement<Action<any>>> = hot('a--b--c', {
+                a: parentAction,
+                b: action1,
+                c: action2
+            });
 
             const dependentObservables: Observable<CorrelatedElement<Action<any>>>[] = [
-                cold('---a', { a: { type: }})
+                actions$.pipe(
+                    ofType(action1.type)
+                ),
+                actions$.pipe(
+                    ofType(action2.type)
+                )
             ];
 
-            const sourceElement$: Observable<Action<any>> = ;
-
-            const result$: Observable<CorrelatedElement<Action<any>[]>> = sourceElement$.pipe(
+            const result$: Observable<CorrelatedElement<Action<any>[]>> = actions$.pipe(
+                ofType(parentAction.type),
                 aggregate(dependentObservables)
             );
 
             const expectedMarble: string = 'a|'
             const expectedValues = {
                 a: [
-
+                    action1,
+                    action2
                 ]
             }
 
