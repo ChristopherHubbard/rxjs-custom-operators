@@ -1,1 +1,1 @@
-export * from './getProp.util';
+export * from './get-prop.util';

@@ -2,7 +2,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { expect } from 'chai';
 import { aggregate } from './aggregate.operator';
 import { Action, createAction } from 'redux-actions';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { ofType } from 'redux-observable';
 import { CorrelatedElement, CorrelationParams } from '../models';
 import { v4 as uuid } from 'uuid';
@@ -63,7 +63,6 @@ describe('Aggregate Operator', () => {
     });
 
     it('should aggregate elements in a Map indicating number of times per action without a failure elements', () => {
-        // Run the marble test scheduler to test the observables
         scheduler.run(({ cold, hot, expectObservable }) => {
             const correlationParams: CorrelationParams = {
                 correlationId: uuid(),
@@ -106,6 +105,41 @@ describe('Aggregate Operator', () => {
     });
 
     it('should fail when one of the internal actions fails with the failELement', () => {
+        scheduler.run(({ cold, hot, expectObservable }) => {
+            const correlationParams: CorrelationParams = {
+                correlationId: uuid(),
+                parentElementId: 'parentAction'
+            };
 
+            const parentAction: CorrelatedElement<Action<any>> = createAction('parentAction', () => ({ correlationParams }))();
+            const action1: Action<any> = createAction('firstAction', (params: any) => ({ ...params, correlationParams }))({});
+            const action2: Action<any> = createAction('secondAction', (params: any) => ({ ...params, correlationParams }))({ value: 3 });
+            const failAction: Action<any> = createAction('failAction', (params: any) => ({ ...params, correlationParams }))({});
+
+            const actions$: HotObservable<CorrelatedElement<Action<any>>> = hot('a--b--c--d', {
+                a: parentAction,
+                b: action1,
+                c: failAction,
+                d: action2
+            });
+
+            const dependentObservables: Map<Observable<CorrelatedElement<Action<any>>>, number> = new Map([
+                [actions$.pipe(ofType(action1.type)), 1],
+                [actions$.pipe(ofType(action2.type)), 1]
+            ]);
+
+            const result$: Observable<CorrelatedElement<Action<any>[]>> = actions$.pipe(
+                ofType(parentAction.type),
+                aggregate(
+                    dependentObservables,
+                    'type',
+                    'payload.correlationParams',
+                    [actions$.pipe(ofType(failAction.type)) as unknown as Observable<Error & CorrelationParams>]
+                )
+            );
+
+            const expectedMarble: string = '------#';
+            expectObservable(result$).toBe(expectedMarble, null, failAction);
+        });
     });
 });
